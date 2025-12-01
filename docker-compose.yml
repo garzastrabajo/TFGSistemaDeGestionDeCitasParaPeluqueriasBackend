@@ -30,12 +30,11 @@ services:
       # Forzamos Postgres en contenedor: user:pass@host:port/db
       - DATABASE_URL=postgresql+psycopg2://admin:1234@db:5432/tfg_peluqueria
     volumes:
-      # Persistencia de ficheros estáticos (subidas)
-      - ./static:/app/static
-      # Hot-reload de código en desarrollo
-      - ./app:/app/app
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+      # En entornos donde Portainer no permite bind mounts, usar volumen nombrado
+      - static_data:/app/static
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     restart: unless-stopped
 
 volumes:
   pgdata:
+  static_data:
