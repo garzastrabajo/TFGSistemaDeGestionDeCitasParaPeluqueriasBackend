@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tfg-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=tfg_peluqueria
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "6543:5432" # puerto del host cambiado para evitar conflictos
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d tfg_peluqueria"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+     # - "8000:8000"
+      - "25007:8000" # Exponemos el puerto 8000 para la API
+    env_file:
+      - .env
+    environment:
+      # Forzamos Postgres en contenedor: user:pass@host:port/db
+      - DATABASE_URL=postgresql+psycopg2://admin:1234@db:5432/tfg_peluqueria
+    volumes:
+      # Persistencia de ficheros estáticos (subidas)
+      - ./static:/app/static
+      # Hot-reload de código en desarrollo
+      - ./app:/app/app
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    restart: unless-stopped
+
+volumes:
+  pgdata:

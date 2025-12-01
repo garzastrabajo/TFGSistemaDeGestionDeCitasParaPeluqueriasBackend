@@ -1,0 +1,50 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Envs
+.env
+.env.*
+.venv/
+venv/
+env/
+
+# Herramientas/IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Testing/Coverage
+.pytest_cache/
+.mypy_cache/
+coverage/
+.coverage*
+htmlcov/
+
+# Caches/Logs
+.cache/
+.ruff_cache/
+*.log
+
+# SO
+.DS_Store
+Thumbs.db
+
+# Construcción/Distribución
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Docker (archivos locales opcionales)
+.docker/
+
+# Datos locales (evita subir fotos de usuarios locales)
+static/user-photos/
+
+# Otros
+.python-version
