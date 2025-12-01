@@ -26,8 +26,6 @@ services:
     ports:
      # - "8000:8000"
       - "25007:8000" # Exponemos el puerto 8000 para la API
-    env_file:
-      - .env
     environment:
       # Forzamos Postgres en contenedor: user:pass@host:port/db
       - DATABASE_URL=postgresql+psycopg2://admin:1234@db:5432/tfg_peluqueria
