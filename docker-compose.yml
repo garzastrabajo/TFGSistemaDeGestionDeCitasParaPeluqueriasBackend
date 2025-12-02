@@ -22,7 +22,8 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
      # - "8000:8000"
       - "25007:8000" # Exponemos el puerto 8000 para la API
