@@ -1,14 +1,16 @@
-# API Barbería 💈 (TFG) – FastAPI + SQLModel
+# API Barbería 💈 (TFG)
 
-Guía completa y reproducible para levantar la API de forma consistente en Windows (PowerShell). Todo orientado a copiar / pegar comandos sin ambigüedad.
+FastAPI + SQLModel + PostgreSQL con Docker Compose. Esta guía refleja el flujo real del proyecto (API en contenedor, Postgres y semillas automáticas).
 
-Docs interactivas: http://127.0.0.1:8000/docs
+Docs interactivas:
+- Docker: http://localhost:25007/docs
+- Local (sin Docker): http://127.0.0.1:8000/docs
 
 ## Requisitos
 
-- Python 3.11+ (funciona también con 3.12)
-- Windows PowerShell (ejecutar comandos tal cual)
-- Opcional: Docker 24+
+- Python 3.11+ (opcional si usas Docker)
+- Windows PowerShell (copiar/pegar comandos)
+- Docker Desktop 24+
 
 ## Estructura resumida
 
@@ -19,8 +21,8 @@ app/
   models/ (*Table para SQLModel + Pydantic)
   helpers/ (seed, memoria, utilidades)
 Dockerfile
+docker-compose.yml
 requirements.txt
-.env (se genera)
 ```
 
 ## 0. Limpieza opcional (solo si quieres empezar desde cero)
@@ -37,7 +39,7 @@ where python
 ```
 Debe mostrar una versión >= 3.11.
 
-## 2. Crear entorno virtual
+## 2. Crear entorno virtual (modo local)
 ```powershell
 python -m venv .venv
 ```
@@ -99,8 +101,17 @@ Start-Process "http://127.0.0.1:8000/docs"
 
 ## 11. Registro + Login + Perfil (flujo JWT)
 ```powershell
-## 12. Backend con Docker Compose (opcional)
-Si prefieres no arrancar `uvicorn` manualmente, usa Docker Compose. Ya hay un `docker-compose.yml` en la raíz del proyecto.
+$reg = @{ username = 'demo'; password = 'Demo#1234'; email = 'demo@example.com' } | ConvertTo-Json
+Invoke-RestMethod -Method POST -Uri http://localhost:25007/auth/register -ContentType 'application/json' -Body $reg
+
+$login = @{ username = 'demo'; password = 'Demo#1234' } | ConvertTo-Json
+$tokens = Invoke-RestMethod -Method POST -Uri http://localhost:25007/auth/login -ContentType 'application/json' -Body $login
+$access = $tokens.access_token
+Invoke-RestMethod -Method GET -Uri http://localhost:25007/auth/me -Headers @{ Authorization = "Bearer $access" }
+```
+
+## 12. Backend con Docker Compose (recomendado)
+La API y Postgres corren en contenedores. El API espera a que Postgres esté sano antes de arrancar.
 
 ```powershell
 # Construir y levantar el backend en segundo plano
@@ -113,9 +124,10 @@ docker compose logs -f api
 docker compose down
 ```
 
-- La API quedará accesible en `http://localhost:8000`.
-- El contenedor lee variables desde `.env` y monta `./data.db` (SQLite) y `./static` para persistencia.
-- Tu app .NET MAUI debe apuntar a `http://localhost:8000` como base URL.
+- API: `http://localhost:25007`
+- Docs: `http://localhost:25007/docs`
+- DB Postgres: servicio `db` en red docker; desde el host en `localhost:6543`.
+- Volúmenes: datos de Postgres (`pgdata`) y estáticos (`static_data`).
 
 - PostgreSQL queda accesible desde el host en `localhost:6543` con:
   - Usuario: `admin`
@@ -150,7 +162,7 @@ docker compose up --build -d
 
 # 4) Comprobar logs y salud
 docker compose logs --tail=100 api
-Invoke-RestMethod -Method GET http://127.0.0.1:8000/health
+Invoke-RestMethod -Method GET http://localhost:25007/health
 ```
 
 Para verificar WSL2 y la distro de Docker:
@@ -161,29 +173,36 @@ wsl -l -v
 
 Si `docker-desktop` aparece detenido o no está, abre Docker Desktop y en Settings → General activa “Use the WSL 2 based engine”. En Settings → Resources → WSL Integration, habilita la integración con tu distro de trabajo.
 $reg = @{ username = 'demo'; password = 'Demo#1234'; email = 'demo@example.com' } | ConvertTo-Json
-Invoke-RestMethod -Method POST -Uri http://127.0.0.1:8000/auth/register -ContentType 'application/json' -Body $reg
+Invoke-RestMethod -Method POST -Uri http://localhost:25007/auth/register -ContentType 'application/json' -Body $reg
 
 $login = @{ username = 'demo'; password = 'Demo#1234' } | ConvertTo-Json
-$tokens = Invoke-RestMethod -Method POST -Uri http://127.0.0.1:8000/auth/login -ContentType 'application/json' -Body $login
+$tokens = Invoke-RestMethod -Method POST -Uri http://localhost:25007/auth/login -ContentType 'application/json' -Body $login
 $access = $tokens.access_token
-Invoke-RestMethod -Method GET -Uri http://127.0.0.1:8000/auth/me -Headers @{ Authorization = "Bearer $access" }
+Invoke-RestMethod -Method GET -Uri http://localhost:25007/auth/me -Headers @{ Authorization = "Bearer $access" }
 ```
 
 ## 12. Listar barberos
 ```powershell
-Invoke-RestMethod -Method GET http://127.0.0.1:8000/barbers
+Invoke-RestMethod -Method GET http://localhost:25007/barbers
 ```
 
 ## 13. Foto de perfil (curl)
 ```powershell
-curl -X POST http://127.0.0.1:8000/users/me/photo -H "Authorization: Bearer $access" -F "file=@foto.jpg"
+curl -X POST http://localhost:25007/users/me/photo -H "Authorization: Bearer $access" -F "file=@foto.jpg"
 ```
 
 ## 14. Comprobar carpeta estática
-```powershell
-Test-Path .\static\user-photos
-Get-ChildItem .\static\user-photos | Select-Object Name, Length
-```
+- Local (sin Docker):
+  ```powershell
+  Test-Path .\static\user-photos
+  Get-ChildItem .\static\user-photos | Select-Object Name, Length
+  ```
+- Con Docker (volumen nombrado):
+  ```powershell
+  docker exec -it tfg-api ls -la /app/static/user-photos 2>$null
+  # Si quieres ver los ficheros en el host, cambia el volumen a bind mount en docker-compose.yml:
+  #   - ./static:/app/static
+  ```
 
 ## 15. Script auxiliar (opcional)
 ```powershell
@@ -217,7 +236,7 @@ Ejecutar:
 `/`, `/health`, `/auth/*`, `/barbers`, `/products`, `/product-categories`, `/services`, `/service-categories`, `/barbershop`, `/gallery`, `/reviews`, `/availability`, `/bookings`.
 
 ## Base de datos
-SQLite local por defecto (`data.db`). Tablas se crean al startup y se hace seed si están vacías.
+Producción/Compose: PostgreSQL. Desarrollo local (sin Docker): SQLite (`data.db`). Las tablas se crean al startup y se insertan semillas si están vacías (incluye usuario admin por defecto `admin/admin`).
 
 ## Conexión a PostgreSQL (DBeaver / psql)
 
@@ -425,37 +444,17 @@ Después, abre una nueva ventana de PowerShell para que los cambios surtan efect
 
 ## Endpoints
 
-- GET /
-- GET /health
-- GET /barbers
-- GET /barbers/{barber_id}
-- GET /barbers/by-service/{service_id}
-- GET /products
-- GET /products/{product_id}
-- GET /products/by-category/{category_id}
-- GET /product-categories
-- GET /services
-- GET /services/{service_id}
-- GET /service-categories
-- GET /barbershop
-- GET /gallery
-- GET /reviews
-- POST /reviews
-- GET /availability (query: barberId, dateStr, slotMinutes?, serviceId?)
-- POST /bookings
-- GET /bookings/{booking_id}
+- Core: GET `/`, GET `/health`
+- Auth: POST `/auth/register`, POST `/auth/login`, GET `/auth/me`, POST `/auth/refresh` (si está habilitado)
+- Users: GET `/users/me`, PUT `/users/me`, POST `/users/me/photo`
+- Barbers: GET `/barbers`, GET `/barbers/{id}`, GET `/barbers/by-service/{service_id}`, POST `/barbers`, PUT `/barbers/{id}`, DELETE `/barbers/{id}`
+- Barbershop: GET `/barbershop`, POST `/barbershop`
+- Services: GET `/services`, GET `/services/{id}`, GET `/services/by-category/{category_id}`, POST `/services`, PUT `/services/{id}`, DELETE `/services/{id}`
+- Service categories: GET `/service-categories`, GET `/service-categories/{id}`, POST `/service-categories`, PUT `/service-categories/{id}`, DELETE `/service-categories/{id}`
+- Products: GET `/products`, GET `/products/{id}`, GET `/products/by-category/{category_id}`, POST `/products`, PUT `/products/{id}`, DELETE `/products/{id}`
+- Product categories: GET `/product-categories`, GET `/product-categories/{id}`, POST `/product-categories`, PUT `/product-categories/{id}`, DELETE `/product-categories/{id}`
+- Gallery: GET `/gallery`, GET `/gallery/{id}`, POST `/gallery`, PUT `/gallery/{id}`, DELETE `/gallery/{id}`
+- Reviews: GET `/reviews`, GET `/reviews/{id}`, POST `/reviews`, PUT `/reviews/{id}`, DELETE `/reviews/{id}`
+- Availability: GET `/availability`, POST `/availability`
+- Bookings: GET `/bookings`, POST `/bookings`, GET `/bookings/me`, GET `/bookings/{id}`
 
-## Próximos pasos sugeridos
-
-1. Añadir capa de persistencia (ORM: SQLModel / SQLAlchemy).
-2. Autenticación (JWT) y roles (admin, barber, cliente).
-3. Tests automatizados (pytest).
-4. Manejo de paginación y filtros avanzados.
-5. Versionado (prefijo /v1).
-6. Manejo de estados de reservas (cancelled, pending, completed).
-7. Webhooks / eventos (opcional).
-8. Documentar ejemplos de payload en OpenAPI (responses y requestBody).
-
-## Nota
-
-La API ya incluye persistencia con SQLModel. En el arranque se crean tablas automáticamente según las clases `*Table` en `app/models`. Si cambias modelos, borra `data.db` (SQLite) para recrearlas desde cero o usa migraciones en el futuro.

@@ -31,7 +31,7 @@ from pathlib import Path as _P
 app = FastAPI(
     title="API Barbería 💈",
     version="1.0.0",
-    description="API modular reestructurada (TFG) sin base de datos todavía."
+    description="API Barbería para la gestión de citas en peluquerías Fast API + SQLModel + PostgreSQL."
 )
 
 # CORS para desarrollo
