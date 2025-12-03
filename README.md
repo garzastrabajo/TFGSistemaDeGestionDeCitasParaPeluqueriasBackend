@@ -248,6 +248,6 @@ Write-Host 'Arrancando servidor...' -ForegroundColor Green
 Proyecto académico (TFG). Ajustar según políticas institucionales. Uso interno y educativo.
 
 ---
-Hecho con FastAPI + SQLModel 💈  – ¡Feliz hacking!
+Hecho con FastAPI + SQLModel 💈
 
 
