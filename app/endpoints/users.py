@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class UserProfileResponse(BaseModel):
     id: int
     username: str
-    email: Optional[str] = None  # cambiado: EmailStr -> str para evitar dependencia email-validator
+    email: Optional[str] = None
     name: Optional[str] = None
     phone: Optional[str] = None
     birthDate: Optional[date] = None
@@ -33,7 +33,7 @@ class UserProfileResponse(BaseModel):
 
 class UpdateUserProfileRequest(BaseModel):
     name: Optional[str] = None
-    email: Optional[str] = None  # EmailStr -> str
+    email: Optional[str] = None
     phone: Optional[str] = None
     birthDate: Optional[date] = None
     photoUrl: Optional[str] = None

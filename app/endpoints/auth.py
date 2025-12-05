@@ -29,7 +29,7 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=8)
     email: Optional[str] = None
     name: Optional[str] = None
-    phone: Optional[str] = None  # NUEVO
+    phone: Optional[str] = None
 
 # Models
 class LoginRequest(BaseModel):
@@ -122,7 +122,7 @@ def register(req: RegisterRequest, session: Session = Depends(get_session)):
         username=req.username,
         email=req.email,
         name=req.name,
-        phone=req.phone,  # NUEVO
+        phone=req.phone,
         password_hash=hashed,
         roles=["user"],
     )

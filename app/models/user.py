@@ -13,9 +13,7 @@ class UserTable(SQLModel, table=True):
     email: Optional[str] = Field(default=None, index=True, unique=True)
     name: Optional[str] = Field(default=None, max_length=100)
     phone: Optional[str] = Field(default=None, max_length=30)
-    # Nueva columna para fecha de nacimiento (persistencia de perfil)
     birth_date: Optional[date] = Field(default=None)
-    # Nueva columna opcional para URL de foto de perfil
     photo_url: Optional[str] = Field(default=None, max_length=255)
     password_hash: str
     roles: List[str] = Field(default_factory=lambda: ["user"], sa_column=Column(JSON))

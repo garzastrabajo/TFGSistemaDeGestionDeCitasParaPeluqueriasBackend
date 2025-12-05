@@ -13,10 +13,10 @@ from app.models.booking import BookingTable
 from app.models.user import UserTable
 from app.endpoints.auth import pwd_context
 
-from datetime import datetime, timezone  # <-- añadido
+from datetime import datetime, timezone
 
 
-def _to_dt(value):  # <-- añadido
+def _to_dt(value):
     if isinstance(value, datetime):
         return value
     if isinstance(value, str):

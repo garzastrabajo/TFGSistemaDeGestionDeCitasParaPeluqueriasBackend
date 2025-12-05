@@ -81,14 +81,12 @@ def get_reviews(
             result.append(legacy)
         return result
 
-    # Fallback memoria
     reviews_mem = DB["reviews"]
     if barberId is not None:
         reviews_mem = [r for r in reviews_mem if r["barberId"] == barberId]
     if serviceId is not None:
         reviews_mem = [r for r in reviews_mem if r["serviceId"] == serviceId]
     reviews_mem = sorted(reviews_mem, key=lambda r: r.get("createdAt", ""), reverse=True)
-    # Normalizar en fallback memoria
     result: list[Review] = []
     base = str(request.base_url)
     for rm in reviews_mem:
@@ -116,7 +114,6 @@ def get_review(review_id: int, request: Request, session: Session = Depends(get_
         else:
             legacy.userPhotoUrl = ensure_absolute(legacy.userPhotoUrl, str(request.base_url)) if legacy.userPhotoUrl else None
         return legacy
-    # Fallback memoria
     m = next((x for x in DB["reviews"] if x["id"] == review_id), None)
     if not m:
         raise HTTPException(status_code=404, detail="No existe la review")
@@ -165,7 +162,7 @@ def update_review(review_id: int, payload: ReviewDB, request: Request, session: 
     r = session.get(ReviewDB, review_id)
     if not r:
         raise HTTPException(status_code=404, detail="No existe la review (SQL)")
-    for field in ["barberId", "serviceId", "rating", "comment", "userName", "userPhotoUrl"]:  # Añadido userPhotoUrl
+    for field in ["barberId", "serviceId", "rating", "comment", "userName", "userPhotoUrl"]:
         val = getattr(payload, field, None)
         if field in ("barberId", "serviceId"):
             val = _normalize_fk(val)

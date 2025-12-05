@@ -9,7 +9,7 @@ from sqlmodel import SQLModel, Field as SQLField
 from sqlalchemy import Index
 
 
-# ---------------- Nuevos modelos alineados con C# ----------------
+# Modelos de cita
 
 class AppointmentState(str, Enum):
     Pendiente = "Pendiente"
@@ -47,9 +47,7 @@ class Appointment(BaseModel):
         )
 
 
-# ---------------- Retrocompatibilidad (tu endpoint actual usa esto) ----------------
-# Mantén estos mientras migras a Appointment. Booking representa tu reserva antigua
-# con start/end como string ISO "YYYY-MM-DDTHH:MM".
+# Retrocompatibilidad: representación previa de reserva con start/end en ISO "YYYY-MM-DDTHH:MM".
 
 class Booking(BaseModel):
     id: int

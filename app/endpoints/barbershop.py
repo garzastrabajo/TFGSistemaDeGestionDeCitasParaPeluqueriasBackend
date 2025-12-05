@@ -33,7 +33,6 @@ def get_barbershop(session: Session = Depends(get_session)):
     row = session.exec(select(BarbershopDB)).first()
     if row:
         return _to_pydantic(row)
-    # Fallback a memoria
     return Barbershop(**DB["barbershop"])
 
 

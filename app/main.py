@@ -4,8 +4,6 @@ import sys
 import logging
 import os
 
-# Permite ejecutar este archivo directamente (python app/main.py) añadiendo la raíz del proyecto al sys.path.
-# Raíz del proyecto = carpeta que contiene "app/"
 CURRENT_FILE = Path(__file__).resolve()
 PROJECT_ROOT = CURRENT_FILE.parent.parent  # .../TFG
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,7 +22,6 @@ from fastapi.staticfiles import StaticFiles
 
 from app.endpoints import register_routers
 from app.db import create_db_and_tables
-# NUEVO: importar seeding
 from app.helpers.seed import seed_memory_data, ensure_admin_user
 from pathlib import Path as _P
 
@@ -100,5 +97,4 @@ def on_startup():
 # Permitir arrancar con: python app/main.py
 if __name__ == "__main__":
     import uvicorn
-    # Nota: este target usa la ruta de módulo para que el autoreload funcione bien.
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

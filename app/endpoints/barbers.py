@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 from app.db import get_session
 from app.models.barber import BarberTable as BarberDB
 from app.models.barber import Barber
-from app.helpers.db_memory import DB  # <-- añadido
+from app.helpers.db_memory import DB
 
 router = APIRouter(prefix="/barbers", tags=["barbers"])
 
@@ -36,7 +36,6 @@ def get_barbers(session: Session = Depends(get_session)):
     items_db = session.exec(select(BarberDB)).all()
     if items_db:                 # Si hay datos en la tabla, usar DB SQL
         return [_to_pydantic(x) for x in items_db]
-    # Fallback a memoria
     return [_from_mem(x) for x in DB.get("barbers", [])]
 
 
@@ -45,7 +44,6 @@ def get_barber(barber_id: int, session: Session = Depends(get_session)):
     b = session.get(BarberDB, barber_id)
     if b:
         return _to_pydantic(b)
-    # Fallback memoria
     m = next((x for x in DB.get("barbers", []) if x.get("id") == barber_id), None)
     if not m:
         raise HTTPException(status_code=404, detail="No existe un barbero con ese id")
@@ -58,7 +56,6 @@ def get_barbers_by_service(service_id: int, session: Session = Depends(get_sessi
     if items_db:
         filtered = [b for b in items_db if b.isActive and (b.servicesOffered and int(service_id) in b.servicesOffered)]
         return [_to_pydantic(b) for b in filtered]
-    # Fallback memoria
     items_mem = DB.get("barbers", [])
     filtered_mem = [
         x for x in items_mem

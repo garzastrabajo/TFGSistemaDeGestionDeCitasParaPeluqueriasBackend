@@ -4,8 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from sqlmodel import SQLModel, Field as SQLField
 
-# ---------- Nuevo (alineado con C#) ----------
-# Si en el futuro migras tu DB a este shape, usa ReviewNew en los endpoints.
+# Modelos nuevos
 class ReviewNew(BaseModel):
     id: int
     userId: int
@@ -24,7 +23,7 @@ class ServiceReview(BaseModel):
     date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-# ---------- Legacy (shape actual de tu DB) ----------
+# Modelos legacy
 class ReviewLegacy(BaseModel):
     id: int
     barberId: Optional[int] = None
@@ -33,7 +32,7 @@ class ReviewLegacy(BaseModel):
     comment: Optional[str] = None
     userName: Optional[str] = None
     createdAt: str  # ISO string
-    userPhotoUrl: Optional[str] = None  # NUEVO
+    userPhotoUrl: Optional[str] = None
 
 
 class CreateReviewLegacy(BaseModel):
@@ -42,12 +41,10 @@ class CreateReviewLegacy(BaseModel):
     rating: int = Field(ge=1, le=5)
     comment: Optional[str] = None
     userName: Optional[str] = None
-    userPhotoUrl: Optional[str] = None  # NUEVO
+    userPhotoUrl: Optional[str] = None
 
 
-# ---------- Aliases para mantener endpoints existentes ----------
-# Tus endpoints hacen: from app.models.review import Review, CreateReview
-# Esto los hace apuntar al modelo legacy actual.
+# Alias para compatibilidad con endpoints actuales
 Review = ReviewLegacy
 CreateReview = CreateReviewLegacy
 
@@ -61,14 +58,12 @@ class ReviewTable(SQLModel, table=True):
     comment: Optional[str] = SQLField(default=None)
     userName: Optional[str] = SQLField(default=None)
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    userPhotoUrl: Optional[str] = SQLField(default=None)  # NUEVO
-    userId: Optional[int] = SQLField(default=None, foreign_key="user.id")  # NUEVO
+    userPhotoUrl: Optional[str] = SQLField(default=None)
+    userId: Optional[int] = SQLField(default=None, foreign_key="user.id")
 
 __all__ = [
-    # Nuevo
     "ReviewNew",
     "ServiceReview",
-    # Legacy + aliases
     "ReviewLegacy",
     "CreateReviewLegacy",
     "Review",

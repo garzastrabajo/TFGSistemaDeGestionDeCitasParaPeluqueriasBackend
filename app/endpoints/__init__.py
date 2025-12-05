@@ -1,5 +1,5 @@
 """
-Registro central de routers. Añade aquí cualquier nuevo recurso.
+Registro central de routers. Se añade aquí cualquier nuevo recurso.
 """
 from fastapi import FastAPI
 

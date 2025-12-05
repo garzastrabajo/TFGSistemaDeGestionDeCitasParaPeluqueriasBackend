@@ -55,7 +55,6 @@ def create_db_and_tables() -> None:
     Importa cada módulo de modelos que define una clase *Table para que se
     registren en el metadata antes de crear las tablas.
     """
-    # Necesitamos poder reasignar el engine si hacemos fallback
     global engine
     import app.models.barber          # BarberTable
     import app.models.barbershop      # BarbershopTable
@@ -82,7 +81,6 @@ def create_db_and_tables() -> None:
                 if "photo_url" not in cols:
                     conn.execute(text("ALTER TABLE user ADD COLUMN photo_url VARCHAR(255)"))
                     changed = True
-                # Nueva columna para reviews: userPhotoUrl y userId
                 review_cols = [row[1] for row in conn.execute(text("PRAGMA table_info('reviews')"))]
                 if "userPhotoUrl" not in review_cols:
                     conn.execute(text("ALTER TABLE reviews ADD COLUMN userPhotoUrl VARCHAR(255)"))

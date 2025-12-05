@@ -16,7 +16,7 @@ class Product(BaseModel):
     price: Optional[Decimal] = Field(default=None)
     displayedPrice: Optional[Decimal] = Field(default=None)
 
-    stock: Optional[int] = None  # Campo legacy que estaba en tu dict
+    stock: Optional[int] = None
     imageUrl: Optional[str] = None
     isActive: bool = True
 

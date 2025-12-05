@@ -1,5 +1,5 @@
 """
-Almacenamiento en memoria (placeholder). Sustituir por repositorios / ORM más adelante.
+Almacenamiento en memoria para entorno de desarrollo.
 """
 from typing import Dict, Any
 
@@ -194,7 +194,7 @@ DB: dict[str, Any] = {
             {"id": 3, "name": "Color", "order": 3},
             {"id": 4, "name": "Niños", "order": 4},
         ],
-        # NUEVO: categorías de producto (CATEGORIA_PRODUCTO)
+        
         "productCategories": [
             {"id": 1, "name": "Champús", "order": 1},
             {"id": 2, "name": "Ceras y Pomadas", "order": 2},

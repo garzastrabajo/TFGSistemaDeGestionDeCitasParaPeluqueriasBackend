@@ -16,7 +16,6 @@ class ServiceOffering(BaseModel):
     isActive: bool = True
 
 
-# Alias retrocompatible (endpoints que siguen usando Service)
 Service = ServiceOffering
 
 class ServiceTable(SQLModel, table=True):

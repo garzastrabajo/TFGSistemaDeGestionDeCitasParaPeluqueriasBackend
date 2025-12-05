@@ -52,7 +52,6 @@ def _to_model(b: BookingDB, session: Optional[Session] = None) -> Booking:
         if svc is not None and getattr(svc, "name", None):
             service_name = svc.name
 
-    # fallback memoria
     if barber_name is None:
         mem_bar = next((x for x in DB.get("barbers", []) if x["id"] == b.barberId), None)
         barber_name = mem_bar.get("name") if mem_bar else None
@@ -140,7 +139,6 @@ def list_bookings(
             rows = [r for r in rows if r.start.startswith(f"{date}T")]
         return [_to_model(r, session) for r in rows]
 
-    # Fallback memoria
     rows_mem = DB.get("bookings", [])
     if barberId is not None:
         rows_mem = [r for r in rows_mem if r["barberId"] == barberId]
@@ -161,7 +159,6 @@ def list_my_bookings(
     # Primero: por userId (una vez migrada la columna)
     rows = session.exec(select(BookingDB).where(col(BookingDB.userId) == user_rec.id)).all()
 
-    # Fallback compatibilidad: por nombre/username en reservas antiguas
     if not rows:
         rows = session.exec(
             select(BookingDB).where((col(BookingDB.customerName) == (user_rec.name or "")) | (col(BookingDB.customerName) == user_rec.username))
@@ -199,7 +196,6 @@ def list_my_upcoming_bookings(
     if rows:
         return [_to_model(r, session) for r in rows]
 
-    # Fallback a memoria en caso de tablas vacías o datos legacy
     name_candidates = set(filter(None, [getattr(user_rec, "name", None), current.username]))
     rows_mem = [
         r
@@ -301,7 +297,6 @@ def cancel_booking(
             b.customerName in {user_rec.name or "", user_rec.username}
         )
     else:
-        # Fallback si no se encontró user_rec (caso muy raro)
         is_owner = b.customerName == current.username
 
     if not is_owner:
@@ -329,7 +324,7 @@ def cancel_booking(
     return _to_model(b, session)
 
 
-# (El endpoint /bookings/me se movió arriba para evitar conflicto con /{booking_id})
+
 
 
 @router.put("/{booking_id}", summary="Actualizar reserva (solo SQL)", response_model=Booking)

@@ -20,10 +20,10 @@ from .category import ProductCategory, ServiceCategory
 from .gallery import GalleryItem
 from .product import Product, InventoryItem, InventoryRecord
 
-# Reexportamos Review y CreateReview apuntando al legacy por compatibilidad
+"""Model exports."""
 from .review import (
-    Review,                 # alias a ReviewLegacy
-    CreateReview,           # alias a CreateReviewLegacy
+    Review,
+    CreateReview,
     ReviewLegacy,
     CreateReviewLegacy,
     ReviewNew,
@@ -60,7 +60,6 @@ __all__ = [
     "Product",
     "InventoryItem",
     "InventoryRecord",
-    # Reviews (legacy + nuevos)
     "Review",
     "CreateReview",
     "ReviewLegacy",
