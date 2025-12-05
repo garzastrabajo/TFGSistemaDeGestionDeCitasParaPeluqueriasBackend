@@ -1,18 +1,9 @@
-"""Configuración de base de datos usando SQLModel.
+"""Configuración de base de datos (SQLModel).
 
-Lee DATABASE_URL de entorno (fallback a SQLite local) y expone:
- - engine: objeto de SQLModel
- - create_db_and_tables(): inicializa las tablas
- - get_session(): dependencia FastAPI para inyectar Session
-
-Uso en endpoints:
-    from app.db import get_session
-    from sqlmodel import Session, select
-
-    @router.get("/items")
-    def list_items(session: Session = Depends(get_session)):
-        items = session.exec(select(Item)).all()
-        return items
+Lee `DATABASE_URL` del entorno (por defecto, SQLite local) y expone:
+- `engine`
+- `create_db_and_tables()`
+- `get_session()`
 """
 
 from __future__ import annotations
@@ -23,8 +14,7 @@ from sqlalchemy.exc import OperationalError
 import os
 from dotenv import load_dotenv
 
-# Cargar variables de entorno si existe .env. Si el archivo estuviera corrupto
-# (caracteres nulos) atrapamos la excepción y seguimos con defaults.
+# Carga .env si existe; si está corrupto, continúa con valores por defecto.
 try:
     load_dotenv()
 except ValueError:
@@ -33,7 +23,7 @@ except ValueError:
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data.db")
 
-# Si el usuario dejó valores de ejemplo en .env, forzamos SQLite local
+# Si DATABASE_URL parece un ejemplo, usar SQLite local
 if any(token in DATABASE_URL for token in [
     "usuario:password@host:5432/dbname",
     "usuario:password@host",
@@ -116,7 +106,7 @@ def create_db_and_tables() -> None:
                 if changed:
                     conn.commit()
     except OperationalError as e:
-        # Si falla (p.ej. Postgres sin credenciales), hacemos fallback a SQLite
+        # Si falla (p. ej. Postgres sin credenciales), usar SQLite local
         if DATABASE_URL.startswith("postgresql"):
             print(f"[WARN] Conexión BD falló: {e}. Fallback a SQLite ./data.db")
             fallback_url = "sqlite:///./data.db"

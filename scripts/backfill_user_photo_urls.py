@@ -1,14 +1,10 @@
-"""Backfill de userPhotoUrl en la tabla reviews.
+"""Backfill de userPhotoUrl en reviews a partir de users.photo_url (username coincidente).
 
-Estrategia simple:
- - Para cada review con userPhotoUrl NULL intenta localizar un usuario cuyo username == review.userName
- - Si lo encuentra y el usuario tiene photo_url no vacía -> copia al campo userPhotoUrl
- - Genera un pequeño resumen al final.
+- Completa solo registros con userPhotoUrl vacío (idempotente).
+- Muestra un breve resumen al finalizar.
 
-Ejecución (PowerShell desde la raíz del proyecto):
+Uso (PowerShell, desde la raíz del proyecto):
     .\.venv\Scripts\python.exe .\scripts\backfill_user_photo_urls.py
-
-Idempotente: puedes ejecutarlo varias veces, solo rellena los vacíos.
 """
 from __future__ import annotations
 import sys

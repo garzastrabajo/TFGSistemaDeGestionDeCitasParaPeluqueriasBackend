@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List
 from pydantic import BaseModel
 
-# Modelo sin equivalente directo en C# (lo conservamos).
+# Respuesta de disponibilidad
 class AvailabilityResponse(BaseModel):
     barberId: int
     date: str

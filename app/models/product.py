@@ -12,7 +12,7 @@ class Product(BaseModel):
     brand: Optional[str] = None
     description: Optional[str] = None
 
-    # Campos de precio (legacy y nuevo)
+    # Campos de precio
     price: Optional[Decimal] = Field(default=None)
     displayedPrice: Optional[Decimal] = Field(default=None)
 
@@ -20,27 +20,23 @@ class Product(BaseModel):
     imageUrl: Optional[str] = None
     isActive: bool = True
 
-    # Permitimos poblar por nombre o alias
+    # Permite poblar por nombre o alias
     model_config = ConfigDict(populate_by_name=True)
 
     @model_validator(mode="before")
     def unify_prices(cls, values):
-        # Si sólo viene 'price', copiamos a displayedPrice
+        # Sincroniza price/displayedPrice en entrada
         if values.get("price") is not None and values.get("displayedPrice") is None:
             values["displayedPrice"] = values["price"]
-        # Si sólo viene 'displayedPrice', copiamos a price
+        # Caso inverso
         if values.get("displayedPrice") is not None and values.get("price") is None:
             values["price"] = values["displayedPrice"]
         return values
 
     def model_dump(self, *args, **kwargs):
-        """
-        Sobrescribimos para garantizar que ambas claves aparecen en la respuesta,
-        manteniendo compatibilidad con frontends que esperan 'price' mientras
-        el dominio nuevo usa 'displayedPrice'.
-        """
+        """Incluye ambas claves de precio para compatibilidad de clientes."""
         data = super().model_dump(*args, **kwargs)
-        # Asegurar sincronización final
+        # Sincronización final
         if data.get("price") is None and data.get("displayedPrice") is not None:
             data["price"] = data["displayedPrice"]
         if data.get("displayedPrice") is None and data.get("price") is not None:
